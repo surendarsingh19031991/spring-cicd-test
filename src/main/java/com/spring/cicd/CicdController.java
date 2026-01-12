@@ -8,6 +8,7 @@ public class CicdController {
 	
 	  @GetMapping("/hello")
 	    public String hello() {
+		  System.out.println("testing");
 	        return "Hello, REST API!";
 	    }
 
