@@ -3,7 +3,7 @@ pipeline {
 
     tools {
         maven 'Default Maven'
-        sonarQubeScanner 'sonar-scanner'
+        sonarScanner 'sonar-scanner'
     }
 
     environment {
@@ -18,7 +18,6 @@ pipeline {
                 sh '''
                   export JAVA_HOME=$JAVA_21_HOME
                   export PATH=$JAVA_HOME/bin:$PATH
-                  echo "Java used for build:"
                   java -version
                   mvn clean verify
                 '''
@@ -31,7 +30,6 @@ pipeline {
                     sh '''
                       export JAVA_HOME=$JAVA_17_HOME
                       export PATH=$JAVA_HOME/bin:$PATH
-                      echo "Java used for Sonar:"
                       java -version
 
                       sonar-scanner \
