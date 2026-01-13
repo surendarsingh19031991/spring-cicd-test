@@ -3,7 +3,6 @@ pipeline {
 
     tools {
         maven 'Default Maven'
-        jdk 'JDK_21'
     }
 
     environment {
@@ -16,12 +15,17 @@ pipeline {
         stage('Build & Test (Java 21)') {
             steps {
                 sh '''
-                  echo "==== JAVA CHECK ===="
+                  export JAVA_HOME=$JAVA_21_HOME
+                  export PATH=$JAVA_HOME/bin:$PATH
+
+                  echo "==== JAVA CHECK (BUILD) ===="
                   which java
                   java -version
+
                   echo "==== MVN CHECK ===="
                   which mvn
                   mvn -version
+
                   mvn clean verify
                 '''
             }
@@ -33,7 +37,9 @@ pipeline {
                     sh '''
                       export JAVA_HOME=$JAVA_17_HOME
                       export PATH=$JAVA_HOME/bin:$PATH
-                      echo "Java used for Sonar:"
+
+                      echo "==== JAVA CHECK (SONAR) ===="
+                      which java
                       java -version
 
                       sonar-scanner \
