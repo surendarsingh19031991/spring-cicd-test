@@ -1,28 +1,53 @@
-node {
-  stage('SCM') {
-    checkout scm
-  }
+pipeline {
+    agent any
 
-  stage('Build & SonarQube Analysis') {
-    def mvn = tool 'Default Maven'
-    def javaHome = tool 'jdk21'
-    env.JAVA_HOME = javaHome
-    env.PATH = "${javaHome}/bin:${env.PATH}"
-
-    withSonarQubeEnv('SonarQube') {
-      sh """
-        java -version
-        ${mvn}/bin/mvn clean verify sonar:sonar \
-        -Dsonar.projectKey=springboot-scan \
-        -Dsonar.projectName=springboot-scan
-      """
+    tools {
+        maven 'maven3'
+        sonarQubeScanner 'sonar-scanner'
     }
-  }
 
-  stage('Quality Gate') {
-    timeout(time: 2, unit: 'MINUTES') {
-      waitForQualityGate abortPipeline: true
+    environment {
+        JAVA_21_HOME = '/usr/lib/jvm/java-21-openjdk-amd64'
+        JAVA_17_HOME = '/usr/lib/jvm/java-17-openjdk-amd64'
     }
-  }
+
+    stages {
+
+        stage('Build & Test (Java 21)') {
+            steps {
+                sh '''
+                  export JAVA_HOME=$JAVA_21_HOME
+                  export PATH=$JAVA_HOME/bin:$PATH
+                  java -version
+                  mvn clean verify
+                '''
+            }
+        }
+
+        stage('SonarQube Analysis (Java 17)') {
+            steps {
+                withSonarQubeEnv('Sonar-Server') {
+                    sh '''
+                      export JAVA_HOME=$JAVA_17_HOME
+                      export PATH=$JAVA_HOME/bin:$PATH
+                      java -version
+
+                      sonar-scanner \
+                      -Dsonar.projectKey=spring-app \
+                      -Dsonar.projectName=spring-app \
+                      -Dsonar.sources=src/main/java \
+                      -Dsonar.java.binaries=target
+                    '''
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+    }
 }
-
