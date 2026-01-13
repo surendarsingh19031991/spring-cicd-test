@@ -18,6 +18,7 @@ pipeline {
                 sh '''
                   export JAVA_HOME=$JAVA_21_HOME
                   export PATH=$JAVA_HOME/bin:$PATH
+                  echo "Java used for build:"
                   java -version
                   mvn clean verify
                 '''
@@ -30,13 +31,15 @@ pipeline {
                     sh '''
                       export JAVA_HOME=$JAVA_17_HOME
                       export PATH=$JAVA_HOME/bin:$PATH
+                      echo "Java used for Sonar:"
                       java -version
 
                       sonar-scanner \
-                      -Dsonar.projectKey=spring-app \
-                      -Dsonar.projectName=spring-app \
-                      -Dsonar.sources=src/main/java \
-                      -Dsonar.java.binaries=target
+                        -Dsonar.projectKey=spring-cicd-test \
+                        -Dsonar.projectName=spring-cicd-test \
+                        -Dsonar.projectBaseDir=$WORKSPACE \
+                        -Dsonar.sources=src/main/java \
+                        -Dsonar.java.binaries=target
                     '''
                 }
             }
