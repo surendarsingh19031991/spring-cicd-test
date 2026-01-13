@@ -34,21 +34,28 @@ pipeline {
         stage('SonarQube Analysis (Java 17)') {
             steps {
                 withSonarQubeEnv('Sonar-Server') {
-                    sh '''
-                      export JAVA_HOME=$JAVA_17_HOME
-                      export PATH=$JAVA_HOME/bin:$PATH
+                    script {
+                        def scannerHome = tool 'sonar-scanner'
+                        sh """
+                          export JAVA_HOME=$JAVA_17_HOME
+                          export PATH=\$JAVA_HOME/bin:\$PATH
+                          export PATH=${scannerHome}/bin:\$PATH
 
-                      echo "==== JAVA CHECK (SONAR) ===="
-                      which java
-                      java -version
+                          echo "==== JAVA CHECK (SONAR) ===="
+                          which java
+                          java -version
 
-                      sonar-scanner \
-                        -Dsonar.projectKey=spring-cicd-test \
-                        -Dsonar.projectName=spring-cicd-test \
-                        -Dsonar.projectBaseDir=$WORKSPACE \
-                        -Dsonar.sources=src/main/java \
-                        -Dsonar.java.binaries=target
-                    '''
+                          echo "==== SONAR SCANNER CHECK ===="
+                          which sonar-scanner
+
+                          sonar-scanner \
+                            -Dsonar.projectKey=spring-cicd-test \
+                            -Dsonar.projectName=spring-cicd-test \
+                            -Dsonar.projectBaseDir=\$WORKSPACE \
+                            -Dsonar.sources=src/main/java \
+                            -Dsonar.java.binaries=target
+                        """
+                    }
                 }
             }
         }
