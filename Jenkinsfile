@@ -16,10 +16,12 @@ pipeline {
         stage('Build & Test (Java 21)') {
             steps {
                 sh '''
-                  export JAVA_HOME=$JAVA_21_HOME
-                  export PATH=$JAVA_HOME/bin:$PATH
-                  echo "Java used for build:"
+                  echo "==== JAVA CHECK ===="
+                  which java
                   java -version
+                  echo "==== MVN CHECK ===="
+                  which mvn
+                  mvn -version
                   mvn clean verify
                 '''
             }
